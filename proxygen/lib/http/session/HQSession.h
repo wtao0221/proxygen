@@ -2086,7 +2086,8 @@ class HQSession
 
  protected:
   HTTPSettings egressSettings_{
-      {SettingsId::HEADER_TABLE_SIZE, hq::kDefaultEgressHeaderTableSize},
+      // {SettingsId::HEADER_TABLE_SIZE, hq::kDefaultEgressHeaderTableSize},
+      {SettingsId::HEADER_TABLE_SIZE, 0},
       {SettingsId::MAX_HEADER_LIST_SIZE, hq::kDefaultEgressMaxHeaderListSize},
       {SettingsId::_HQ_QPACK_BLOCKED_STREAMS,
        hq::kDefaultEgressQpackBlockedStream},

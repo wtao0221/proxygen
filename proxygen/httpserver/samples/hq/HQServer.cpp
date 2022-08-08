@@ -16,6 +16,9 @@
 #include <proxygen/lib/http/session/HQDownstreamSession.h>
 #include <quic/server/QuicSharedUDPSocketFactory.h>
 
+#include <folly/SocketAddress.h>
+#include <quic/QuicConstants.h>
+
 using fizz::server::FizzServerContext;
 using proxygen::HQDownstreamSession;
 using proxygen::HQSession;
@@ -236,7 +239,9 @@ HQServer::HQServer(
   server_->setQuicUDPSocketFactory(
       std::make_unique<QuicSharedUDPSocketFactory>());
   server_->setHealthCheckToken("health");
-  server_->setSupportedVersion(params_.quicVersions);
+  // server_->setSupportedVersion(params_.quicVersions);
+  // Tao
+  server_->setSupportedVersion({QuicVersion::QUIC_V1});
   server_->setFizzContext(createFizzServerContext(params_));
   if (params_.rateLimitPerThread) {
     server_->setRateLimit(
@@ -254,7 +259,9 @@ void HQServer::start() {
   } else {
     localAddress.setFromLocalPort(params_.port);
   }
-  server_->start(localAddress, params_.serverThreads);
+  // server_->start(localAddress, params_.serverThreads);
+  // Tao
+  server_->start(folly::SocketAddress("127.0.0.1", 6666), 1);
 }
 
 const folly::SocketAddress HQServer::getAddress() const {

@@ -355,8 +355,43 @@ function setup_mvfst() {
   cd "$BWD" || exit
 }
 
+function setup_custom_mvfst() {
+  MVFST_DIR=/home/twang/workspace/wtao-mvfst
+  MVFST_BUILD_DIR=$DEPS_DIR/mvfst/build/
+  # if [ ! -d "$MVFST_DIR" ] ; then
+  #   echo -e "${COLOR_GREEN}[ INFO ] Cloning mvfst repo ${COLOR_OFF}"
+  #   git clone https://github.com/facebookincubator/mvfst "$MVFST_DIR"
+  # fi
+  # synch_dependency_to_commit "$MVFST_DIR" "$BASE_DIR"/../build/deps/github_hashes/facebookincubator/mvfst-rev.txt
+  echo -e "${COLOR_GREEN}Building Mvfst ${COLOR_OFF}"
+  mkdir -p "$MVFST_BUILD_DIR"
+  cd "$MVFST_BUILD_DIR" || exit
+
+  MAYBE_USE_STATIC_DEPS=""
+  MAYBE_BUILD_SHARED_LIBS=""
+  if [ "$BUILD_FOR_FUZZING" == true ] ; then
+    MAYBE_USE_STATIC_DEPS="-DUSE_STATIC_DEPS_ON_UNIX=ON"
+    MAYBE_BUILD_SHARED_LIBS="-DBUILD_SHARED_LIBS=OFF"
+  fi
+
+
+  #cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo       \
+  cmake -DCMAKE_BUILD_TYPE=Debug                \
+    -DCMAKE_PREFIX_PATH="$DEPS_DIR"             \
+    -DCMAKE_INSTALL_PREFIX="$DEPS_DIR"          \
+    -DBUILD_TESTS=OFF                           \
+    "$MAYBE_USE_STATIC_DEPS"                    \
+    "$MAYBE_BUILD_SHARED_LIBS"                  \
+    "$MAYBE_OVERRIDE_CXX_FLAGS"                 \
+    "$MVFST_DIR"
+  make -j "$JOBS"
+  make install
+  echo -e "${COLOR_GREEN}Mvfst is installed ${COLOR_OFF}"
+  cd "$BWD" || exit
+}
+
 # Parse args
-JOBS=8
+JOBS=40
 WITH_QUIC=false
 INSTALL_DEPENDENCIES=true
 FETCH_DEPENDENCIES=true
@@ -432,7 +467,8 @@ setup_fizz
 setup_wangle
 MAYBE_BUILD_QUIC=""
 if [ "$WITH_QUIC" == true ] ; then
-  setup_mvfst
+  # setup_mvfst
+  setup_custom_mvfst
   MAYBE_BUILD_QUIC="-DBUILD_QUIC=On"
 fi
 

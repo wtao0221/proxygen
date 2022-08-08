@@ -222,14 +222,20 @@ void HQClient::initializeQuicClient() {
           .build());
   client->setPacingTimer(pacingTimer_);
   client->setHostname(params_.host);
-  client->addNewPeerAddress(params_.remoteAddress.value());
+  // client->addNewPeerAddress(params_.remoteAddress.value());
+  // Tao
+  client->addNewPeerAddress(folly::SocketAddress("127.0.0.1", 6666));
   if (params_.localAddress.has_value()) {
     client->setLocalAddress(*params_.localAddress);
   }
+  // Tao
+  client->setLocalAddress(folly::SocketAddress("127.0.0.1", 8888));
   client->setCongestionControllerFactory(
       std::make_shared<quic::DefaultCongestionControllerFactory>());
   client->setTransportSettings(params_.transportSettings);
-  client->setSupportedVersions(params_.quicVersions);
+  assert(params_.transportSettings.streamFramePerPacket==true); // check whether the transport setting is overwritten
+  // client->setSupportedVersions(params_.quicVersions);
+  client->setSupportedVersions({QuicVersion::QUIC_V1});
 
   quicClient_ = std::move(client);
 }
